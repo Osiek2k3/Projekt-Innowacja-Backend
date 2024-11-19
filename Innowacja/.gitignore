@@ -1,0 +1,13 @@
+# Ignoruj foldery i pliki bin i obj
+bin/
+obj/
+
+# Ignoruj pliki .dll i .pdb
+*.dll
+*.pdb
+
+# Ignoruj foldery Visual Studio
+.vs/
+
+
+/src/MySpot.Api/logs/logs.txt
