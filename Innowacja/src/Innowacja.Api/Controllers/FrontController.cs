@@ -40,7 +40,6 @@ namespace Innowacja.Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<FrontDto>> GetByIdWithGeneratedImage(int id)
         {
-
             var brak = await _context.BrakiProduktow
                 .Where(b => b.IdBraku == id)
                 .FirstOrDefaultAsync();
@@ -52,28 +51,34 @@ namespace Innowacja.Api.Controllers
 
             string sourceFilePath = brak.SciezkaDoPliku;
 
-            string outputFilePath = Path.Combine(
-                Path.GetDirectoryName(sourceFilePath),
-                $"{Path.GetFileNameWithoutExtension(sourceFilePath)}_{id}{Path.GetExtension(sourceFilePath)}"
-            );
+            string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(sourceFilePath);
+            if (!fileNameWithoutExtension.EndsWith($"_{id}"))
+            {
+                string outputFilePath = Path.Combine(
+                    Path.GetDirectoryName(sourceFilePath),
+                    $"{fileNameWithoutExtension}_{id}{Path.GetExtension(sourceFilePath)}"
+                );
 
-            DrawRectangle(sourceFilePath, (int)brak.Xmin, (int)brak.Xmax, (int)brak.Ymin, (int)brak.Ymax, outputFilePath);
+                
+                DrawRectangle(sourceFilePath, (int)brak.Xmin, (int)brak.Xmax, (int)brak.Ymin, (int)brak.Ymax, outputFilePath);
 
-            brak.SciezkaDoPliku = outputFilePath;
+                brak.SciezkaDoPliku = outputFilePath;
 
-            _context.BrakiProduktow.Update(brak);
-            await _context.SaveChangesAsync(); 
+                _context.BrakiProduktow.Update(brak);
+                await _context.SaveChangesAsync();
+            }
 
             var result = new FrontDto
             {
                 IdBraku = brak.IdBraku.ToString(),
                 NumerPolki = brak.NumerPolki.ToString(),
                 NumerProduktuNaPolce = brak.NumerProduktu.ToString(),
-                SciezkaDoPliku = outputFilePath
+                SciezkaDoPliku = brak.SciezkaDoPliku
             };
 
             return Ok(result);
         }
+
         private static void DrawRectangle(string filePath, int xmin, int xmax, int ymin, int ymax, string outputFilePath)
         {
             using (Bitmap bitmap = new Bitmap(filePath))
