@@ -3,9 +3,10 @@ namespace Innowacja.Application.DTO
 {
     public class FrontDto
     {
-        public string IdBraku { get; set; }
-        public string NumerPolki { get; set; }
-        public string NumerProduktuNaPolce { get; set; }
-        public string SciezkaDoPliku { get; set; }
+        public string ShortageId { get; set; } 
+        public string ProductName { get; set; } = string.Empty; 
+        public string? ShelfNumber { get; set; } 
+        public string? ProductNumber { get; set; }
+        public string? FilePath { get; set; }
     }
 }

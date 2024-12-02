@@ -3,53 +3,55 @@ using Innowacja.Core.Entities;
 using Innowacja.Infrastructure.EF;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
+using Microsoft.Identity.Client.Extensions.Msal;
 using System.Drawing;
 
 namespace Innowacja.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class BrakiProduktowController : ControllerBase
+    public class ProductShortagesController : ControllerBase
     {
-        private readonly MyDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public BrakiProduktowController(MyDbContext context)
+        public ProductShortagesController(ApplicationDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/BrakiProduktow
+        // GET: api/ProductShortages
         [HttpGet]
         public async Task<ActionResult<IEnumerable<FrontDto>>> GetAll()
         {
-            var result = await _context.BrakiProduktow
-                .Select(b => new FrontDto
+            var result = await _context.ProductShortages
+                .Select(ps => new FrontDto
                 {
-                    IdBraku = b.IdBraku.ToString(),
-                    NumerPolki = b.NumerPolki.ToString(),
-                    NumerProduktuNaPolce = b.NumerProduktu.ToString(),
-                    SciezkaDoPliku = b.SciezkaDoPliku
+                    ShortageId = ps.ShortageId.ToString(),
+                    ProductName = ps.ProductName,
+                    ShelfNumber = ps.ShelfNumber.ToString(),
+                    ProductNumber = ps.ProductName.ToString(),
+                    FilePath = ps.FilePath
                 })
                 .ToListAsync();
 
             return Ok(result);
         }
 
-        // GET: api/BrakiProduktow/{id}
+        // GET: api/ProductShortages/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<FrontDto>> GetByIdWithGeneratedImage(int id)
         {
-            var brak = await _context.BrakiProduktow
-                .Where(b => b.IdBraku == id)
+            var shortage = await _context.ProductShortages
+                .Include(ps => ps.Shelf)
+                .Where(ps => ps.ShortageId == id)
                 .FirstOrDefaultAsync();
 
-            if (brak == null)
+            if (shortage == null)
             {
-                return NotFound($"Brak z ID {id} nie został znaleziony.");
+                return NotFound($"Shortage with ID {id} was not found.");
             }
 
-            string sourceFilePath = brak.SciezkaDoPliku;
+            string sourceFilePath = shortage.FilePath;
 
             string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(sourceFilePath);
             if (!fileNameWithoutExtension.EndsWith($"_{id}"))
@@ -59,22 +61,23 @@ namespace Innowacja.Api.Controllers
                     $"{fileNameWithoutExtension}_{id}{Path.GetExtension(sourceFilePath)}"
                 );
 
-                
-                DrawRectangle(sourceFilePath, (int)brak.Xmin, (int)brak.Xmax, (int)brak.Ymin, (int)brak.Ymax, outputFilePath);
+                DrawRectangle(sourceFilePath, (int)shortage.Xmin, (int)shortage.Xmax, (int)shortage.Ymin, (int)shortage.Ymax, outputFilePath);
 
-                brak.SciezkaDoPliku = outputFilePath;
+                shortage.FilePath = outputFilePath;
 
-                _context.BrakiProduktow.Update(brak);
+                _context.ProductShortages.Update(shortage);
                 await _context.SaveChangesAsync();
             }
 
             var result = new FrontDto
             {
-                IdBraku = brak.IdBraku.ToString(),
-                NumerPolki = brak.NumerPolki.ToString(),
-                NumerProduktuNaPolce = brak.NumerProduktu.ToString(),
-                SciezkaDoPliku = brak.SciezkaDoPliku
+                ShortageId = shortage.ShortageId.ToString(),
+                ProductName = shortage.ProductName,
+                ShelfNumber = shortage.ShelfNumber.ToString(),
+                ProductNumber = shortage.ProductName.ToString(),
+                FilePath = shortage.FilePath
             };
+           
 
             return Ok(result);
         }
@@ -96,8 +99,40 @@ namespace Innowacja.Api.Controllers
                 bitmap.Save(outputFilePath);
             }
         }
+
+        // GET: api/ProductShortages/categories
+        [HttpGet("categories")]
+        public async Task<ActionResult<IEnumerable<object>>> GetAllCategories()
+        {
+            var categories = await _context.Departments
+                .Select(d => new { d.DepartmentId, d.DepartmentName })
+                .ToListAsync();
+
+            return Ok(categories);
+        }
+
+        // GET: api/ProductShortages/categories/{categoryId}/products
+        [HttpGet("categories/{categoryId}/products")]
+        public async Task<ActionResult<IEnumerable<object>>> GetProductsByCategory(int categoryId)
+        {
+            var products = await _context.ProductShortages
+                .Include(ps => ps.Shelf)
+                .Where(ps => ps.Shelf.DepartmentId == categoryId)
+                .Select(ps => new
+                {
+                    ps.ShortageId,
+                    ps.ProductName,
+                    ps.ShelfNumber,
+                    ps.FilePath
+                })
+                .ToListAsync();
+
+            if (!products.Any())
+            {
+                return NotFound($"No products found in category with ID {categoryId}.");
+            }
+
+            return Ok(products);
+        }
     }
-
-    
-
 }
