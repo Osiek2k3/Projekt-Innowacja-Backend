@@ -20,6 +20,7 @@ namespace Innowacja.Api.Controllers
         }
 
         // GET: api/ProductShortages
+        //zwraca wszystkie braki produktów
         [HttpGet]
         public async Task<ActionResult<IEnumerable<FrontDto>>> GetAll()
         {
@@ -29,7 +30,7 @@ namespace Innowacja.Api.Controllers
                     ShortageId = ps.ShortageId.ToString(),
                     ProductName = ps.ProductName,
                     ShelfNumber = ps.ShelfNumber.ToString(),
-                    ProductNumber = ps.ProductName.ToString(),
+                    ProductNumber = ps.ProductNumber.ToString(),
                     FilePath = ps.FilePath
                 })
                 .ToListAsync();
@@ -38,6 +39,7 @@ namespace Innowacja.Api.Controllers
         }
 
         // GET: api/ProductShortages/{id}
+        //zwraca brak produktu po ID
         [HttpGet("{id}")]
         public async Task<ActionResult<FrontDto>> GetByIdWithGeneratedImage(int id)
         {
@@ -74,10 +76,10 @@ namespace Innowacja.Api.Controllers
                 ShortageId = shortage.ShortageId.ToString(),
                 ProductName = shortage.ProductName,
                 ShelfNumber = shortage.ShelfNumber.ToString(),
-                ProductNumber = shortage.ProductName.ToString(),
+                ProductNumber = shortage.ProductNumber.ToString(),
                 FilePath = shortage.FilePath
             };
-           
+
 
             return Ok(result);
         }
@@ -101,6 +103,7 @@ namespace Innowacja.Api.Controllers
         }
 
         // GET: api/ProductShortages/categories
+        //zwraca wszystkie kategorie
         [HttpGet("categories")]
         public async Task<ActionResult<IEnumerable<object>>> GetAllCategories()
         {
@@ -112,6 +115,7 @@ namespace Innowacja.Api.Controllers
         }
 
         // GET: api/ProductShortages/categories/{categoryId}/products
+        //zwraca wszystkie braki produktów w danej kategori po ID 
         [HttpGet("categories/{categoryId}/products")]
         public async Task<ActionResult<IEnumerable<object>>> GetProductsByCategory(int categoryId)
         {
@@ -123,6 +127,7 @@ namespace Innowacja.Api.Controllers
                     ps.ShortageId,
                     ps.ProductName,
                     ps.ShelfNumber,
+                    ps.ProductNumber,
                     ps.FilePath
                 })
                 .ToListAsync();
@@ -132,10 +137,7 @@ namespace Innowacja.Api.Controllers
                 return NotFound($"No products found in category with ID {categoryId}.");
             }
 
-<<<<<<< HEAD
-=======
             return Ok(products);
         }
     }
->>>>>>> 2d8b14fac753cd58416df6795452752f9d5fa8cf
 }
