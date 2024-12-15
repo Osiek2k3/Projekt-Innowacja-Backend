@@ -19,24 +19,25 @@ namespace Innowacja.Api.Controllers
             _context = context;
         }
 
-        // GET: api/BrakiProduktow
+        // GET: api/ProductShortages
         [HttpGet]
         public async Task<ActionResult<IEnumerable<FrontDto>>> GetAll()
         {
             var result = await _context.BrakiProduktow
                 .Select(b => new FrontDto
                 {
-                    IdBraku = b.IdBraku.ToString(),
-                    NumerPolki = b.NumerPolki.ToString(),
-                    NumerProduktuNaPolce = b.NumerProduktu.ToString(),
-                    SciezkaDoPliku = b.SciezkaDoPliku
+                    ShortageId = ps.ShortageId.ToString(),
+                    ProductName = ps.ProductName,
+                    ShelfNumber = ps.ShelfNumber.ToString(),
+                    ProductNumber = ps.ProductName.ToString(),
+                    FilePath = ps.FilePath
                 })
                 .ToListAsync();
 
             return Ok(result);
         }
 
-        // GET: api/BrakiProduktow/{id}
+        // GET: api/ProductShortages/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<FrontDto>> GetByIdWithGeneratedImage(int id)
         {
@@ -70,10 +71,11 @@ namespace Innowacja.Api.Controllers
 
             var result = new FrontDto
             {
-                IdBraku = brak.IdBraku.ToString(),
-                NumerPolki = brak.NumerPolki.ToString(),
-                NumerProduktuNaPolce = brak.NumerProduktu.ToString(),
-                SciezkaDoPliku = brak.SciezkaDoPliku
+                ShortageId = shortage.ShortageId.ToString(),
+                ProductName = shortage.ProductName,
+                ShelfNumber = shortage.ShelfNumber.ToString(),
+                ProductNumber = shortage.ProductName.ToString(),
+                FilePath = shortage.FilePath
             };
 
             return Ok(result);
@@ -96,8 +98,37 @@ namespace Innowacja.Api.Controllers
                 bitmap.Save(outputFilePath);
             }
         }
-    }
 
-    
+        // GET: api/ProductShortages/categories
+        [HttpGet("categories")]
+        public async Task<ActionResult<IEnumerable<object>>> GetAllCategories()
+        {
+            var categories = await _context.Departments
+                .Select(d => new { d.DepartmentId, d.DepartmentName })
+                .ToListAsync();
+
+            return Ok(categories);
+        }
+
+        // GET: api/ProductShortages/categories/{categoryId}/products
+        [HttpGet("categories/{categoryId}/products")]
+        public async Task<ActionResult<IEnumerable<object>>> GetProductsByCategory(int categoryId)
+        {
+            var products = await _context.ProductShortages
+                .Include(ps => ps.Shelf)
+                .Where(ps => ps.Shelf.DepartmentId == categoryId)
+                .Select(ps => new
+                {
+                    ps.ShortageId,
+                    ps.ProductName,
+                    ps.ShelfNumber,
+                    ps.FilePath
+                })
+                .ToListAsync();
+
+            if (!products.Any())
+            {
+                return NotFound($"No products found in category with ID {categoryId}.");
+            }
 
 }
