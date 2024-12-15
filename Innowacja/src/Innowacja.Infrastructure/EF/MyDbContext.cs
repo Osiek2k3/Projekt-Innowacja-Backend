@@ -1,21 +1,24 @@
 ﻿using Innowacja.Core.Entities;
 using Microsoft.EntityFrameworkCore;
-using System;
+
 
 namespace Innowacja.Infrastructure.EF
 {
-    public class MyDbContext : DbContext
+    public class ApplicationDbContext : DbContext
     {
-        public DbSet<BrakProduktow> BrakiProduktow { get; set; }
-
-        public MyDbContext(DbContextOptions<MyDbContext> options) : base(options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
         {
         }
+        public DbSet<Department> Departments { get; set; } = null!;
+        public DbSet<Shelf> Shelves { get; set; } = null!;
+        public DbSet<ProductShortage> ProductShortages { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<BrakProduktow>(entity =>
+            modelBuilder.Entity<Department>(entity =>
             {
+<<<<<<< HEAD
 <<<<<<< Updated upstream
                 entity.HasKey(e => e.IdBraku);
                 entity.Property(e => e.NumerPolki).IsRequired();
@@ -26,6 +29,8 @@ namespace Innowacja.Infrastructure.EF
                 entity.Property(e => e.Ymax).IsRequired();
                 entity.Property(e => e.SciezkaDoPliku).HasMaxLength(int.MaxValue);
 =======
+=======
+>>>>>>> 2d8b14fac753cd58416df6795452752f9d5fa8cf
                 entity.ToTable("Department");
                 entity.HasKey(d => d.DepartmentId);
                 entity.Property(d => d.DepartmentName).IsRequired().HasMaxLength(255);
@@ -33,7 +38,11 @@ namespace Innowacja.Infrastructure.EF
 
             modelBuilder.Entity<Shelf>(entity =>
             {
+<<<<<<< HEAD
                 entity.ToTable("Shelf"); 
+=======
+                entity.ToTable("Shelf"); // Wyraźne ustawienie nazwy tabeli
+>>>>>>> 2d8b14fac753cd58416df6795452752f9d5fa8cf
                 entity.HasKey(s => s.shopShelfId);
                 entity.HasOne(s => s.Department)
                       .WithMany(d => d.Shelves)
@@ -50,8 +59,12 @@ namespace Innowacja.Infrastructure.EF
                       .WithMany(s => s.ProductShortages)
                       .HasForeignKey(ps => ps.shopShelfId)
                       .OnDelete(DeleteBehavior.Cascade);
+<<<<<<< HEAD
 >>>>>>> Stashed changes
+=======
+>>>>>>> 2d8b14fac753cd58416df6795452752f9d5fa8cf
             });
         }
     }
+
 }

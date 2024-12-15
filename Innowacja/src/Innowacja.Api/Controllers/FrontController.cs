@@ -3,18 +3,18 @@ using Innowacja.Core.Entities;
 using Innowacja.Infrastructure.EF;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
+using Microsoft.Identity.Client.Extensions.Msal;
 using System.Drawing;
 
 namespace Innowacja.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class BrakiProduktowController : ControllerBase
+    public class ProductShortagesController : ControllerBase
     {
-        private readonly MyDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public BrakiProduktowController(MyDbContext context)
+        public ProductShortagesController(ApplicationDbContext context)
         {
             _context = context;
         }
@@ -23,8 +23,8 @@ namespace Innowacja.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<FrontDto>>> GetAll()
         {
-            var result = await _context.BrakiProduktow
-                .Select(b => new FrontDto
+            var result = await _context.ProductShortages
+                .Select(ps => new FrontDto
                 {
                     ShortageId = ps.ShortageId.ToString(),
                     ProductName = ps.ProductName,
@@ -41,16 +41,17 @@ namespace Innowacja.Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<FrontDto>> GetByIdWithGeneratedImage(int id)
         {
-            var brak = await _context.BrakiProduktow
-                .Where(b => b.IdBraku == id)
+            var shortage = await _context.ProductShortages
+                .Include(ps => ps.Shelf)
+                .Where(ps => ps.ShortageId == id)
                 .FirstOrDefaultAsync();
 
-            if (brak == null)
+            if (shortage == null)
             {
-                return NotFound($"Brak z ID {id} nie został znaleziony.");
+                return NotFound($"Shortage with ID {id} was not found.");
             }
 
-            string sourceFilePath = brak.SciezkaDoPliku;
+            string sourceFilePath = shortage.FilePath;
 
             string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(sourceFilePath);
             if (!fileNameWithoutExtension.EndsWith($"_{id}"))
@@ -60,12 +61,11 @@ namespace Innowacja.Api.Controllers
                     $"{fileNameWithoutExtension}_{id}{Path.GetExtension(sourceFilePath)}"
                 );
 
-                
-                DrawRectangle(sourceFilePath, (int)brak.Xmin, (int)brak.Xmax, (int)brak.Ymin, (int)brak.Ymax, outputFilePath);
+                DrawRectangle(sourceFilePath, (int)shortage.Xmin, (int)shortage.Xmax, (int)shortage.Ymin, (int)shortage.Ymax, outputFilePath);
 
-                brak.SciezkaDoPliku = outputFilePath;
+                shortage.FilePath = outputFilePath;
 
-                _context.BrakiProduktow.Update(brak);
+                _context.ProductShortages.Update(shortage);
                 await _context.SaveChangesAsync();
             }
 
@@ -77,6 +77,7 @@ namespace Innowacja.Api.Controllers
                 ProductNumber = shortage.ProductName.ToString(),
                 FilePath = shortage.FilePath
             };
+           
 
             return Ok(result);
         }
@@ -131,4 +132,10 @@ namespace Innowacja.Api.Controllers
                 return NotFound($"No products found in category with ID {categoryId}.");
             }
 
+<<<<<<< HEAD
+=======
+            return Ok(products);
+        }
+    }
+>>>>>>> 2d8b14fac753cd58416df6795452752f9d5fa8cf
 }
