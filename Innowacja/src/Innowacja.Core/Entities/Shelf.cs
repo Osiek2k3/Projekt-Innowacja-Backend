@@ -5,6 +5,7 @@ namespace Innowacja.Core.Entities
     {
         public int shopShelfId { get; set; }
         public int DepartmentId { get; set; }
+        public int ShelfNumber { get; set; }
 
         public Department Department { get; set; } = null!;
 

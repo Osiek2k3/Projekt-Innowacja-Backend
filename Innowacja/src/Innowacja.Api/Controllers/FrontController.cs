@@ -29,7 +29,7 @@ namespace Innowacja.Api.Controllers
                 {
                     ShortageId = ps.ShortageId.ToString(),
                     ProductName = ps.ProductName,
-                    ShelfNumber = ps.ShelfNumber.ToString(),
+                    ShelfNumber = ps.Shelf.ShelfNumber.ToString(),
                     ProductNumber = ps.ProductNumber.ToString(),
                     FilePath = ps.FilePath
                 })
@@ -75,7 +75,7 @@ namespace Innowacja.Api.Controllers
             {
                 ShortageId = shortage.ShortageId.ToString(),
                 ProductName = shortage.ProductName,
-                ShelfNumber = shortage.ShelfNumber.ToString(),
+                ShelfNumber = shortage.Shelf.ShelfNumber.ToString(),
                 ProductNumber = shortage.ProductNumber.ToString(),
                 FilePath = shortage.FilePath
             };
@@ -126,7 +126,7 @@ namespace Innowacja.Api.Controllers
                 {
                     ps.ShortageId,
                     ps.ProductName,
-                    ps.ShelfNumber,
+                    ps.Shelf.ShelfNumber,
                     ps.ProductNumber,
                     ps.FilePath
                 })

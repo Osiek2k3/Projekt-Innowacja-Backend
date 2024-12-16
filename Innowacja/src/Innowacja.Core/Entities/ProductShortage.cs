@@ -6,7 +6,6 @@ namespace Innowacja.Core.Entities
         public int ShortageId { get; set; }
         public int shopShelfId { get; set; }
         public string ProductName { get; set; } = null!;
-        public int ShelfNumber { get; set; }
         public int ProductNumber { get; set; }
         public double Xmin { get; set; }
         public double Xmax { get; set; }
