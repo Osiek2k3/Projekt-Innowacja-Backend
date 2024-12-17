@@ -25,6 +25,7 @@ The project aims to create a system that detects missing products on store shelv
 
 ### Steps to Run the Backend  
  
-   git clone https://github.com/your-username/your-repository.git
-   cd backend
-   dotnet run
+  - git clone https://github.com/your-username/your-repository.git
+  - cd backend
+  - dotnet run
+   
