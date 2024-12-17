@@ -23,12 +23,6 @@ The project aims to create a system that detects missing products on store shelv
 
 ## 🚀 How to Run the Backend  
 
-### Prerequisites  
-Make sure you have the following installed:  
-- **.NET SDK** (version 6.0 or newer)  
-- **SQL Server** (or another compatible database)  
-- Correct **connection string** configured in the `appsettings.json` file.  
-
 ### Steps to Run the Backend  
  
    git clone https://github.com/your-username/your-repository.git
