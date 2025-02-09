@@ -142,5 +142,21 @@ namespace Innowacja.Api.Controllers
 
             return Ok(products);
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteProductShortage(int id)
+        {
+            var shortage = await _context.ProductShortages.FindAsync(id);
+
+            if (shortage == null)
+            {
+                return NotFound($"ProductShortage with ID {id} was not found.");
+            }
+
+            _context.ProductShortages.Remove(shortage);
+            await _context.SaveChangesAsync();
+
+            return Ok(id);
+        }
     }
 }
