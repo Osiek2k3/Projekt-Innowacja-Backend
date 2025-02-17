@@ -110,8 +110,13 @@ namespace Innowacja.Api.Controllers
         public async Task<ActionResult<IEnumerable<object>>> GetAllCategories()
         {
             var categories = await _context.Departments
-                .Select(d => new { d.DepartmentId, d.DepartmentName })
-                .ToListAsync();
+            .Select(d => new
+            {
+                d.DepartmentId,
+                d.DepartmentName,
+                ProductCount = _context.ProductShortages.Count(ps => ps.Shelf.DepartmentId == d.DepartmentId)
+            })
+            .ToListAsync();
 
             return Ok(categories);
         }
@@ -143,6 +148,8 @@ namespace Innowacja.Api.Controllers
             return Ok(products);
         }
 
+        // DELETE: api/ProductShortages/{id}
+        //Usuwa brak produktu po ID
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProductShortage(int id)
         {
