@@ -79,7 +79,8 @@ namespace Innowacja.Api.Controllers
                 ShelfUnit = shortage.Shelf.ShelfUnit.ToString(),
                 ShelfNumber = shortage.ShelfNumber.ToString(),
                 ProductNumber = shortage.ProductNumber.ToString(),
-                FilePath = shortage.FilePath
+                FilePath = shortage.FilePath,
+                DepartmentId = shortage.Shelf.DepartmentId.ToString()
             };
 
 
@@ -124,8 +125,22 @@ namespace Innowacja.Api.Controllers
         // GET: api/ProductShortages/categories/{categoryId}/products
         //zwraca wszystkie braki produktów w danej kategori po ID 
         [HttpGet("categories/{categoryId}/products")]
-        public async Task<ActionResult<IEnumerable<object>>> GetProductsByCategory(int categoryId)
+        public async Task<ActionResult<object>> GetProductsByCategory(int categoryId)
         {
+            var category = await _context.Departments
+                .Where(d => d.DepartmentId == categoryId)
+                .Select(d => new
+                {
+                    d.DepartmentId,
+                    d.DepartmentName
+                })
+                .FirstOrDefaultAsync();
+
+            if (category == null)
+            {
+                return NotFound($"Category with ID {categoryId} was not found.");
+            }
+
             var products = await _context.ProductShortages
                 .Include(ps => ps.Shelf)
                 .Where(ps => ps.Shelf.DepartmentId == categoryId)
@@ -140,12 +155,12 @@ namespace Innowacja.Api.Controllers
                 })
                 .ToListAsync();
 
-            if (!products.Any())
+            return Ok(new
             {
-                return NotFound($"No products found in category with ID {categoryId}.");
-            }
-
-            return Ok(products);
+                CategoryId = category.DepartmentId,
+                CategoryName = category.DepartmentName,
+                Products = products
+            });
         }
 
         // DELETE: api/ProductShortages/{id}

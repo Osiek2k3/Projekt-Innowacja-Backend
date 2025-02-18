@@ -9,5 +9,6 @@ namespace Innowacja.Application.DTO
         public string? ShelfNumber { get; set; } 
         public string? ProductNumber { get; set; }
         public string? FilePath { get; set; }
+        public string? DepartmentId { get; set; }
     }
 }
